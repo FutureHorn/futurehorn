@@ -1,3 +1,0 @@
-/home/chen/CodeBase/futurehorn/modules/planner/build/CMakeFiles/rebuild_cache.dir
-/home/chen/CodeBase/futurehorn/modules/planner/build/CMakeFiles/edit_cache.dir
-/home/chen/CodeBase/futurehorn/modules/planner/build/CMakeFiles/planner.dir
