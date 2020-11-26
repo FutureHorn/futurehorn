@@ -11,8 +11,8 @@ set(ROOT    "${CMAKE_CURRENT_SOURCE_DIR}")
 include_directories(
     ${OpenCV_INCLUDE_DIRS}
     ${ROOT}/
-    ${ROOT}/../../include
-    ${ROOT}/../../include/rapidjson
+    ${ROOT}/../../third/include
+    ${ROOT}/../../third/include/rapidjson
 )
 
 link_directories(
