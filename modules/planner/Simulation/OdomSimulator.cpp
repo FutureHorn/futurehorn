@@ -1,4 +1,4 @@
-#include "RobotControl.h"
+#include "OdomSimulator.h"
 
 
 using namespace Eigen;
@@ -16,7 +16,7 @@ void RoundTheta(float &theta)
 }
 
 
-RobotControl::RobotControl()
+OdomSimulator::OdomSimulator()
 {
 	m_v_in = 0.0f;
     m_omega_in = 0.0f;
@@ -24,21 +24,21 @@ RobotControl::RobotControl()
 	m_omega_out = 0.0f; 
 }
 
-RobotControl::~RobotControl()
+OdomSimulator::~OdomSimulator()
 {
 
 }
 
 // 机器人控制自己是一个线程
-bool RobotControl::start()
+bool OdomSimulator::start()
 {
 	m_isReceivedCommand = false;
-	m_task = (std::thread(std::bind(&RobotControl::run, this)));
+	m_task = (std::thread(std::bind(&OdomSimulator::run, this)));
 	return true;
 }
 
 // 
-void RobotControl::run()
+void OdomSimulator::run()
 {
 	while (true)
 	{
@@ -53,7 +53,7 @@ void RobotControl::run()
 	}
 }
 
-void RobotControl::simulationOdometry()
+void OdomSimulator::simulationOdometry()
 {
 	float tdq1 = (m_v_in - m_omega_in*D*0.5)/R; // 输入到机器人的v和omega，由于机器人的实际负载，会产生误差
 	float tdq2 = (m_v_in + m_omega_in*D*0.5)/R; // 这两行是左右轮子在角速度omega下的移动弧度
@@ -98,7 +98,7 @@ void RobotControl::simulationOdometry()
 }
 
 // 上位机发送命令: v和omega
-void RobotControl::sendToOdometry(float v_in, float omega_in)
+void OdomSimulator::sendToOdometry(float v_in, float omega_in)
 {
     m_isReceivedCommand = true;
     m_v_in = v_in * 0.001;  // 下位机接受到的是像素位置/s，计算时单位需要转成m/s
@@ -107,7 +107,7 @@ void RobotControl::sendToOdometry(float v_in, float omega_in)
 }
 
 // 下位机返回实际的值:v和omega
-void RobotControl::getFromOdometry(float &v_out, float &omega_out)
+void OdomSimulator::getFromOdometry(float &v_out, float &omega_out)
 {
 	v_out = m_v_out*1000; // 下位机计算时单位是m/s,传给机器人模拟器的单位是像素/s  
 	omega_out = -m_omega_out; // 下位机的omega方向与像素方向相反

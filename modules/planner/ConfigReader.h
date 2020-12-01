@@ -30,6 +30,7 @@ class ConfigReader
 
     public:
         std::string m_task_map_path;
+        double m_map_resolution;
 
         std::string m_task_type;
         int m_task_start_x;
@@ -37,6 +38,8 @@ class ConfigReader
         int m_task_end_x;
         int m_task_end_y;
 
+        double m_robot_length;
+        double m_robot_width;
 
 };
 

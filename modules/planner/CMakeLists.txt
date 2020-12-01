@@ -11,6 +11,8 @@ set(ROOT    "${CMAKE_CURRENT_SOURCE_DIR}")
 include_directories(
     ${OpenCV_INCLUDE_DIRS}
     ${ROOT}/
+    ${ROOT}/TrajectoryControl
+    ${ROOT}/Simulation
     ${ROOT}/../../third/include
     ${ROOT}/../../third/include/rapidjson
 )
@@ -22,6 +24,8 @@ link_directories(
 file(GLOB SOURCES
     "*.cpp"
     "*.cxx"
+    "${ROOT}/Simulation/*.cpp"
+    "${ROOT}/TrajectoryControl/*.cpp"
 )
 
 set( PROJECT_LINK_LIBS

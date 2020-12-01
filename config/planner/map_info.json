@@ -2,6 +2,7 @@
     "map":
     {
         "id":0,
-        "info":"test"
+        "info":"test",
+        "resolution":0.02
     }   
 }

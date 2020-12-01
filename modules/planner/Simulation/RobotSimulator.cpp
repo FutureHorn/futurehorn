@@ -5,7 +5,7 @@ RobotSimulator::RobotSimulator()
     
 }
 
-RobotSimulator::RobotSimulator(RobotControl *rc, RobotPose pose, int intervalTime)
+RobotSimulator::RobotSimulator(OdomSimulator *rc, RobotPose pose, int intervalTime)
 {
     m_robotControl = rc;
     m_robot_pose = pose;

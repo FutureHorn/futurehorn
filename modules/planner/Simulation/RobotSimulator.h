@@ -7,7 +7,7 @@
 #include <mutex>
 #include <vector>
 
-#include "RobotControl.h"
+#include "OdomSimulator.h"
 
 typedef struct RobotPose
 {
@@ -46,7 +46,7 @@ class RobotSimulator
 {
 public:
     RobotSimulator();
-    RobotSimulator(RobotControl *rc, RobotPose pose, int intervalTime);
+    RobotSimulator(OdomSimulator *rc, RobotPose pose, int intervalTime);
     ~RobotSimulator();
 
 	
@@ -66,7 +66,7 @@ protected:
     float m_robot_v;
     float m_robot_omega;
 
-    RobotControl *m_robotControl;
+    OdomSimulator *m_robotControl;
 };
 
 

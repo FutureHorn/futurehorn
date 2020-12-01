@@ -1,5 +1,5 @@
-#ifndef __ROBOTCONTROL_H__
-#define __ROBOTCONTROL_H__
+#ifndef __ODOMSIMULATOR_H__
+#define __ODOMSIMULATOR_H__
 
 #include <iostream>
 #include <memory>
@@ -15,11 +15,11 @@
 
 void RoundTheta(float &theta);
 
-class RobotControl
+class OdomSimulator
 {
 public:
-	RobotControl();
-	~RobotControl();
+	OdomSimulator();
+	~OdomSimulator();
 
 	bool start();
     void simulationOdometry();

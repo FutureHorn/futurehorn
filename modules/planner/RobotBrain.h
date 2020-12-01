@@ -20,6 +20,11 @@ class RobotBrain
         int m_current_x_map;
         int m_current_y_map;
         int m_current_theta_map;
+
+        double m_able_forward;
+        double m_able_back;
+        double m_able_left_rotate;
+        double m_able_right_rotate;
 };
 
 #endif
