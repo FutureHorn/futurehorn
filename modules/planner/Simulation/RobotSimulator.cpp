@@ -5,7 +5,7 @@ RobotSimulator::RobotSimulator()
     
 }
 
-RobotSimulator::RobotSimulator(OdomSimulator *rc, RobotPose pose, int intervalTime)
+RobotSimulator::RobotSimulator(OdomSimulator *rc, RobotSimulatorPose pose, int intervalTime)
 {
     m_robotControl = rc;
     m_robot_pose = pose;
@@ -33,25 +33,25 @@ void RobotSimulator::run()
 
 		m_robotControl->getFromOdometry(m_robot_v, m_robot_omega); // 得到下位机实际能够提供的v和omega
        
-        RobotPose next_pose = calcNextPose();
+        RobotSimulatorPose next_pose = calcNextPose();
 
         moveToPose(next_pose);
 	}
 }
 
-RobotPose RobotSimulator::getRobotPose()
+RobotSimulatorPose RobotSimulator::getRobotPose()
 {
     // std::cout<<"get pose: "<<m_robot_pose.x<<" "<<m_robot_pose.y<<" "<<m_robot_pose.theta<<std::endl;
 
     return m_robot_pose;
 }
 
-void RobotSimulator::moveToPose(RobotPose pose)
+void RobotSimulator::moveToPose(RobotSimulatorPose pose)
 {
     m_robot_pose = pose;  // 机器人跳到下一个点位
 }
 
-RobotPose RobotSimulator::calcNextPose()
+RobotSimulatorPose RobotSimulator::calcNextPose()
 {
     // std::cout<<"机器人收到的速度v: "<<m_robot_v<<"角速度omega: "<<m_robot_omega<<std::endl;
     float omega, v;
@@ -64,7 +64,7 @@ RobotPose RobotSimulator::calcNextPose()
     float dx = cos(m_robot_pose.theta) * v * 0.001f*m_dtime; // 沿着当前小车方向，以速度v来计算出新的机器人位置
     float dy = sin(m_robot_pose.theta) * v * 0.001f*m_dtime;
 
-    RobotPose tmp;
+    RobotSimulatorPose tmp;
     tmp.x = m_robot_pose.x + dx;
     tmp.y = m_robot_pose.y + dy;
     tmp.theta = m_robot_pose.theta + dtheta;

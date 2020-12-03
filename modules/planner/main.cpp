@@ -16,7 +16,13 @@ TaskMaintainer_offline g_taskMaintainer_offline;
 Drawer g_drawer;
 ConfigReader g_configer;
 
-RobotStatus g_robotStatus_now;
+RobotController g_robot_controller;
+bool g_robot_controller_ready;
+RotateParams g_robot_rotate_params;
+GoParams g_robot_go_params;
+MoveParams g_robot_move_params;
+
+RobotStatus g_robot_status_now;
 
 
 
@@ -27,7 +33,9 @@ RobotStatus g_robotStatus_now;
     #include "DockingPlan.h"
 #endif
 
-RobotController g_robotController;
+#ifdef __SIMULATION__
+    RobotSimulatorPose g_robotSimulator_current_pose;
+#endif
 
 double m_ICPdocking_start_x;
 double m_ICPdocking_start_y;
@@ -173,52 +181,96 @@ int main(int argc, char** argv)
     
     g_taskMaintainer_offline.setTask(g_configer.m_task_type);
 
-    g_robotStatus_now.x_map = 600;
-    g_robotStatus_now.y_map = 800;
-    g_robotStatus_now.theta_map = CV_PI/3;
-
-
-    int x_initial = 100;
-    int y_initial = 200;
-    double theta_initial = CV_PI/3;
-    int x_target = 500;
-    int y_target = 700;
-    double theta_target = CV_PI/2;
+    g_robot_status_now.x_map = 600;
+    g_robot_status_now.y_map = 800;
+    g_robot_status_now.theta_map = CV_PI/3;
 
 #ifdef __SIMULATION__
-    RobotPose simulatePG(x_initial, y_initial, theta_initial);
+    int x_initial = g_robot_status_now.x_map;
+    int y_initial = g_robot_status_now.y_map;
+    double theta_initial = g_robot_status_now.theta_map;
+    RobotSimulatorPose g_robotSimulator_current_pose(x_initial, y_initial, theta_initial);
     OdomSimulator *odomSimulator = new OdomSimulator();
     odomSimulator->start();
-    RobotSimulator *robotSimulator = new RobotSimulator(odomSimulator, simulatePG, 10);
+    RobotSimulator *robotSimulator = new RobotSimulator(odomSimulator, g_robotSimulator_current_pose, 10);
     robotSimulator->start();
 #endif
 
+
+    // int x_initial = 100;
+    // int y_initial = 200;
+    // double theta_initial = CV_PI/3;
+    // int x_target = 500;
+    // int y_target = 700;
+    // double theta_target = CV_PI/2;
+
+
     
-    bool forward = true;
-    m_ICPdocking_start_x = x_initial;
-    m_ICPdocking_start_y = y_initial;
-    if (forward)
-    {
-        m_ICPdocking_start_theta = theta_initial;
-    }
-    else
-    {
-        m_ICPdocking_start_theta = theta_initial - CV_PI;
-    }
-    m_ICPdocking_end_x = x_target; 
-    m_ICPdocking_end_y = y_target;
-    m_ICPdocking_end_theta = theta_target;
-    m_ICPdocking_dp.init();
-    m_ICPdocking_phase = 0;
+    // bool forward = true;
+    // m_ICPdocking_start_x = x_initial;
+    // m_ICPdocking_start_y = y_initial;
+    // if (forward)
+    // {
+    //     m_ICPdocking_start_theta = theta_initial;
+    // }
+    // else
+    // {
+    //     m_ICPdocking_start_theta = theta_initial - CV_PI;
+    // }
+    // m_ICPdocking_end_x = x_target; 
+    // m_ICPdocking_end_y = y_target;
+    // m_ICPdocking_end_theta = theta_target;
+    // m_ICPdocking_dp.init();
+    // m_ICPdocking_phase = 0;
 
 
     std::cout<<"planner init success!"<<std::endl;
     
     
     
-    
-    while(true)
+    int flag = 1;
+    while (flag == 1)
     {
+    // {std::cout<<"fafa"<<std::endl;
+        double v, omega;
+        g_robotSimulator_current_pose = robotSimulator->getRobotPose();
+        g_robot_status_now.x_map = g_robotSimulator_current_pose.x;
+        g_robot_status_now.y_map = g_robotSimulator_current_pose.y;
+        g_robot_status_now.theta_map = g_robotSimulator_current_pose.theta;
+
+        if (!g_robot_controller_ready)
+        {
+            g_robot_rotate_params.theta_initial = g_robot_status_now.theta_map;
+            g_robot_rotate_params.theta_target = g_robot_status_now.theta_map - CV_PI/2;
+            NormalizeAngle(g_robot_rotate_params.theta_target);
+            g_robot_controller.setRotateParams(g_robot_rotate_params);
+            g_robot_controller_ready = true;
+        }
+        flag = g_robot_controller.rotate(g_robot_status_now, v, omega);
+
+        // if (!g_robot_controller_ready)
+        // {
+        //     g_robot_go_params.x_initial = g_robot_status_now.x_map;
+        //     g_robot_go_params.y_initial = g_robot_status_now.y_map;
+        //     g_robot_go_params.go_distance = 10;
+
+        //     g_robot_controller.setGoParams(g_robot_go_params);
+        //     g_robot_controller_ready = true;
+        // }
+        // flag = g_robot_controller.go(g_robot_status_now, v, omega);
+
+        odomSimulator->sendToOdometry(v, omega);
+        
+        // std::cout<<g_robotStatus_now.theta_map<<std::endl;
+        g_robot_status_now.v = v;
+        g_robot_status_now.v = v;
+
+        if (flag == 0)
+        {
+            break;
+        }
+        
+
         g_drawer.draw();
     }
     

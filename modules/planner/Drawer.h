@@ -10,7 +10,7 @@
 #include "StructDefine.h"
 
 extern MapMaintainer g_mapMaintainer;
-extern RobotStatus g_robotStatus_now;
+extern RobotStatus g_robot_status_now;
 
 class Drawer
 {

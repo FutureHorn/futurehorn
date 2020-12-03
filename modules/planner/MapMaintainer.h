@@ -15,7 +15,7 @@
 #include "ConfigReader.h"
 #include "Common.h"
 
-extern RobotStatus g_robotStatus_now;
+extern RobotStatus g_robot_status_now;
 extern ConfigReader g_configer;
 
 class MapMaintainer
@@ -30,6 +30,7 @@ class MapMaintainer
         void run();
         void clearCache();
 
+        void emptyMap();
         void updateLocalMap();
         void updateRobot();
 
@@ -37,6 +38,7 @@ class MapMaintainer
         std::thread m_thread;
 
     public:
+        cv::Mat m_map_online_whole_empty;
         cv::Mat m_map_online_whole;
         cv::Mat m_map_online_local;
         int m_localMap_size = 700;
