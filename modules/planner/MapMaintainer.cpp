@@ -86,19 +86,21 @@ void MapMaintainer::updateRobot()
     // }
     cv::polylines(m_map_online_whole, m_robot_corners, true, cv::Scalar(0), 1);
     
-    cv::Point center(g_robot_status_now.x_map, g_robot_status_now.y_map);
-    cv::Point center_(g_robot_status_now.x_map + 20*cos(g_robot_status_now.theta_map), g_robot_status_now.y_map + 5*sin(g_robot_status_now.theta_map));
+    cv::Point center(int(g_robot_status_now.x_map), int(g_robot_status_now.y_map));
+    cv::Point center_(int(g_robot_status_now.x_map + 20*cos(g_robot_status_now.theta_map)), int(g_robot_status_now.y_map + 20*sin(g_robot_status_now.theta_map)));
+    cv::Point center_left(int(center_.x + 10*cos(g_robot_status_now.theta_map+CV_PI*0.8)), int(center_.y + 10*sin(g_robot_status_now.theta_map+CV_PI*0.8)));
+    cv::Point center_right(int(center_.x + 10*cos(g_robot_status_now.theta_map+CV_PI*1.2)), int(center_.y + 10*sin(g_robot_status_now.theta_map+CV_PI*1.2)));
+    
     cv::line(m_map_online_whole, center, center_, cv::Scalar(0), 1, 8, 0);
+    cv::line(m_map_online_whole, center_, center_left, cv::Scalar(0), 1, 8, 0);
+    cv::line(m_map_online_whole, center_, center_right, cv::Scalar(0), 1, 8, 0);
 }
 
 void MapMaintainer::updateLocalMap()
 {
-    
-
     m_map_online_local = cv::Mat(m_localMap_size, m_localMap_size, CV_32FC1);
 
     double col_min = (g_robot_status_now.x_map - m_localMap_size/2 > 0) ? g_robot_status_now.x_map - m_localMap_size/2 : 0;
-    
     double row_min = (g_robot_status_now.y_map - m_localMap_size/2 > 0) ? g_robot_status_now.y_map - m_localMap_size/2 : 0;
     double col_max = (g_robot_status_now.x_map + m_localMap_size/2 < m_wholeMap_size_col) ? g_robot_status_now.x_map + m_localMap_size/2 : m_wholeMap_size_col - 1;
     double row_max = (g_robot_status_now.y_map + m_localMap_size/2 < m_wholeMap_size_row) ? g_robot_status_now.y_map + m_localMap_size/2 : m_wholeMap_size_row - 1;

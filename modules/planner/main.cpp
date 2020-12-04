@@ -47,30 +47,32 @@ DockingPlan m_ICPdocking_dp;
 
 int m_ICPdocking_phase;
 
-double v_command;
-double omega_command;
+double g_command_v;
+double g_command_omega;
 
 
 int _execute_ICP_move()
 {
     bool able_forward = true, able_reverse = true, able_left_spin = true, able_right_spin = true;
   
-    double _v = 0.0f, _omega = 0.0f;
+    double _v = 0.0, _omega = 0.0;
    
     int _flag;
     if (m_ICPdocking_phase == 0)
     {
-        double dist_before_end = 1;
+        double dist_before_end = 200;
         double docking_x_end_before = m_ICPdocking_end_x + dist_before_end*cos(CV_PI+m_ICPdocking_end_theta);
         double docking_y_end_before = m_ICPdocking_end_y + dist_before_end*sin(CV_PI+m_ICPdocking_end_theta);
        
         g_robot_rotate_params.theta_target = atan2(docking_y_end_before - m_ICPdocking_start_y, docking_x_end_before - m_ICPdocking_start_x);
+        NormalizeAngle(g_robot_rotate_params.theta_target);
+        g_robot_controller.setRotateParams(g_robot_rotate_params);
 
         m_ICPdocking_phase = 1;
     }
     if (m_ICPdocking_phase == 1)
     {
-        _flag = _flag = g_robot_controller.rotate(g_robot_status_now, _v, _omega);
+        _flag = g_robot_controller.rotate(g_robot_status_now, _v, _omega);
         if (_flag == 0)
         {
             m_ICPdocking_phase = 2;
@@ -107,6 +109,9 @@ int _execute_ICP_move()
     if (m_ICPdocking_phase == 3)
     {
         g_robot_rotate_params.theta_target = m_ICPdocking_end_theta;
+        NormalizeAngle(g_robot_rotate_params.theta_target);
+        g_robot_controller.setRotateParams(g_robot_rotate_params);
+
         m_ICPdocking_phase = 4;
         m_ICPdocking_dp.init();
     }
@@ -150,8 +155,8 @@ int _execute_ICP_move()
         }   
     }
 
-    v_command = _v;
-    omega_command = _omega;
+    g_command_v = _v;
+    g_command_omega = _omega;
     
     return _flag;
 }
@@ -179,7 +184,7 @@ int main(int argc, char** argv)
     
     g_taskMaintainer_offline.setTask(g_configer.m_task_type);
 
-    g_robot_status_now.x_map = 800;
+    g_robot_status_now.x_map = 700;
     g_robot_status_now.y_map = 800;
     g_robot_status_now.theta_map = CV_PI/3;
 
@@ -224,8 +229,7 @@ int main(int argc, char** argv)
     int task_phase = 0;
     while (task_flag == 1)
     {
-    
-        double v, omega;
+
         g_robotSimulator_current_pose = robotSimulator->getRobotPose();
         g_robot_status_now.x_map = g_robotSimulator_current_pose.x;
         g_robot_status_now.y_map = g_robotSimulator_current_pose.y;
@@ -240,8 +244,8 @@ int main(int argc, char** argv)
             //     g_robot_controller.setRotateParams(g_robot_rotate_params);
             //     g_robot_controller_ready = true;
             // }
-            // task_flag = g_robot_controller.rotate(g_robot_status_now, v, omega);
-            task_flag = _execute_ICP_move();std::cout<<"!!!"<<std::endl;
+            // task_flag = g_robot_controller.rotate(g_robot_status_now, g_command_v, g_command_omega);
+            task_flag = _execute_ICP_move();
         }
         
         if (task_phase == 1)
@@ -253,16 +257,16 @@ int main(int argc, char** argv)
                 g_robot_controller.setGoParams(g_robot_go_params);
                 g_robot_controller_ready = true;
             }
-            task_flag = g_robot_controller.go(g_robot_status_now, v, omega);
+            task_flag = g_robot_controller.go(g_robot_status_now, g_command_v, g_command_omega);
         }
 
         
 
-        odomSimulator->sendToOdometry(v, omega);
+        odomSimulator->sendToOdometry(g_command_v, g_command_omega);
         
         // std::cout<<g_robotStatus_now.theta_map<<std::endl;
-        g_robot_status_now.v = v;
-        g_robot_status_now.omega = omega;
+        g_robot_status_now.v = g_command_v;
+        g_robot_status_now.omega = g_command_omega;
 
         if (task_flag == 0)
         {
