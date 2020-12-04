@@ -7,9 +7,11 @@
 #include <opencv2/highgui.hpp>
 
 #include "StructDefine.h"
+#include "MapMaintainer.h"
 #include "Common.h"
 
 extern RobotStatus g_robot_status_now;
+extern MapMaintainer g_mapMaintainer;
 
 struct MoveParams
 {
@@ -36,10 +38,12 @@ struct GoParams
 
     double x_initial = 10.0f;
     double y_initial = 10.0f;
+    double theta_initial = 10.0f;
     double x_target = 10.0f;
     double y_target = 10.0f;
+    double theta_target = 10.0f;
 
-    double dist_reach_error = 0.002f;
+    double dist_reach_error = 0.02f;
 };
 
 struct RotateParams

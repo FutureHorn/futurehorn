@@ -39,7 +39,7 @@ class DockingPlan
                             double x_start, double y_start, double theta_start,
                             double x_end, double y_end, double theta_end,
                             double robot_x_now, double robot_y_now, double robot_theta_now,
-                            float& v, float& omega, std::string planType, bool isdraw);
+                            double& v, double& omega, std::string planType, bool isdraw);
         void calculateTracjectoryPoints();
         double getTimeNow();
         std::vector<cv::Point2d> generateWaypoint(double start_x, double start_y, double start_theta, 

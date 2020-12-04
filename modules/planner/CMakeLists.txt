@@ -13,6 +13,7 @@ include_directories(
     ${ROOT}/
     ${ROOT}/TrajectoryControl
     ${ROOT}/Simulation
+    ${ROOT}/PathGenerate
     ${ROOT}/../../third/include
     ${ROOT}/../../third/include/rapidjson
 )
@@ -26,6 +27,7 @@ file(GLOB SOURCES
     "*.cxx"
     "${ROOT}/Simulation/*.cpp"
     "${ROOT}/TrajectoryControl/*.cpp"
+    "${ROOT}/PathGenerate/*.cpp"
 )
 
 set( PROJECT_LINK_LIBS

@@ -10,23 +10,23 @@ enum TASKTYPE
 
 struct RobotStatus
 {
-    double x = 0.0f;
-    double y = 0.0f;
-    double theta = 0.0f;
+    double x = 0.0;
+    double y = 0.0;
+    double theta = 0.0;
 
-    double x_map = 0.0f;
-    double y_map = 0.0f;
-    double theta_map = 0.0f;
+    double x_map = 0.0;
+    double y_map = 0.0;
+    double theta_map = 0.0;
 
-    double battery_value = 100.0f;
+    double battery_value = 100.0;
 
-    double v_max = 0.3f;
-    double v_min = 0.2f;
-    double omega_max = 0.2f;
-    double omega_min = 0.1f;
+    double v_max = 0.3;
+    double v_min = 0.2;
+    double omega_max = 0.2;
+    double omega_min = 0.1;
 
-    double v = 0.0f;
-    double omega = 0.0f;
+    double v = 0.0;
+    double omega = 0.0;
 };
 
 

@@ -143,7 +143,7 @@ int DockingPlan::dockingPlanning(bool able_forward, bool able_reverse, bool able
                             double x_start, double y_start, double theta_start,
                             double x_end, double y_end, double theta_end,
                             double robot_x_now, double robot_y_now, double robot_theta_now,
-                            float& v, float& omega, std::string planType, bool isdraw)
+                            double& v, double& omega, std::string planType, bool isdraw)
 {  
     m_planType = planType;
     m_isdraw = isdraw;

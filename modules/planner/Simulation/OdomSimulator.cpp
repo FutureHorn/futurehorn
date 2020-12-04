@@ -101,7 +101,7 @@ void OdomSimulator::simulationOdometry()
 void OdomSimulator::sendToOdometry(float v_in, float omega_in)
 {
     m_isReceivedCommand = true;
-    m_v_in = v_in * 0.001;  // 下位机接受到的是像素位置/s，计算时单位需要转成m/s
+    m_v_in = v_in;  // 下位机模拟器接受到planner的命令是m/s
     m_omega_in = -omega_in; // 下位机的omega方向与像素方向相反
 	// std::cout<<"下位机接受到的命令 v: "<<m_v_in<<" omega:"<<omega_in<<std::endl;
 }
@@ -109,7 +109,7 @@ void OdomSimulator::sendToOdometry(float v_in, float omega_in)
 // 下位机返回实际的值:v和omega
 void OdomSimulator::getFromOdometry(float &v_out, float &omega_out)
 {
-	v_out = m_v_out*1000; // 下位机计算时单位是m/s,传给机器人模拟器的单位是像素/s  
+	v_out = m_v_out / g_mapMaintainer.m_map_resolution; // 机器人模拟器传回下位机的单位是像素/s，需要转换成m/s  
 	omega_out = -m_omega_out; // 下位机的omega方向与像素方向相反
 	// std::cout<<"下位机输出到机器人的 v: "<<v_out<<" omega:"<<omega_out<<std::endl;
 }
