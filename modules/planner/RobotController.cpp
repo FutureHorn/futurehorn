@@ -89,7 +89,6 @@ int RobotController::rotate(RobotStatus robot_status_now, double &v, double &ome
         omega = 0.1 * gap / fabs(gap);
     }
     
-    std::cout<<"theta error: "<<omega<<std::endl;
     if ( fabs(gap) < m_rotate_params.theta_reach_error)
     {
         return 0;

@@ -31,10 +31,13 @@ RobotStatus g_robot_status_now;
     #include "OdomSimulator.h"
     #include "LqrControl.h"
     #include "DockingPlan.h"
+    #include "LqrPlan.h"
 #endif
 
 #ifdef __SIMULATION__
     RobotSimulatorPose g_robotSimulator_current_pose;
+
+    LqrPlan g_lqr_planner;
 #endif
 
 double m_ICPdocking_start_x;
@@ -50,21 +53,27 @@ int m_ICPdocking_phase;
 double g_command_v;
 double g_command_omega;
 
+MapPoint pose_start, pose_end;
+
 
 int _execute_ICP_move()
 {
-    bool able_forward = true, able_reverse = true, able_left_spin = true, able_right_spin = true;
-  
+    
     double _v = 0.0, _omega = 0.0;
    
     int _flag;
     if (m_ICPdocking_phase == 0)
     {
+        pose_start.x_map = g_robot_status_now.x_map;
+        pose_start.y_map = g_robot_status_now.y_map;
+        pose_start.theta_map = g_robot_status_now.theta_map;
+
         double dist_before_end = 200;
-        double docking_x_end_before = m_ICPdocking_end_x + dist_before_end*cos(CV_PI+m_ICPdocking_end_theta);
-        double docking_y_end_before = m_ICPdocking_end_y + dist_before_end*sin(CV_PI+m_ICPdocking_end_theta);
+        pose_end.x_map = m_ICPdocking_end_x + dist_before_end*cos(CV_PI+m_ICPdocking_end_theta);
+        pose_end.y_map = m_ICPdocking_end_y + dist_before_end*sin(CV_PI+m_ICPdocking_end_theta);
+        pose_end.theta_map = g_robot_status_now.theta_map;
        
-        g_robot_rotate_params.theta_target = atan2(docking_y_end_before - m_ICPdocking_start_y, docking_x_end_before - m_ICPdocking_start_x);
+        g_robot_rotate_params.theta_target = atan2(pose_end.y_map - pose_start.y_map, pose_end.x_map - pose_start.x_map);
         NormalizeAngle(g_robot_rotate_params.theta_target);
         g_robot_controller.setRotateParams(g_robot_rotate_params);
 
@@ -85,11 +94,13 @@ int _execute_ICP_move()
     }
     if (m_ICPdocking_phase == 2)
     {
-        _flag = m_ICPdocking_dp.dockingPlanning(able_forward, able_reverse, able_left_spin, able_right_spin,
-                                m_ICPdocking_start_x, m_ICPdocking_start_y, m_ICPdocking_start_theta, 
-                                m_ICPdocking_end_x, m_ICPdocking_end_y, m_ICPdocking_end_theta,
-                                g_robot_status_now.x_map, g_robot_status_now.y_map, g_robot_status_now.theta_map,
-                                _v, _omega, "line", true);
+        MapPoint pose_now;
+        pose_now.x_map = g_robot_status_now.x_map;
+        pose_now.y_map = g_robot_status_now.y_map;
+        pose_now.theta_map = g_robot_status_now.theta_map;
+       
+        _flag = g_lqr_planner.lqrPlanning("whole_path_line", pose_start, pose_end, pose_now,
+                                _v, _omega);
         if (_flag == 0)
         {
             m_ICPdocking_phase = 3;
@@ -124,6 +135,13 @@ int _execute_ICP_move()
             m_ICPdocking_start_y = g_robot_status_now.y_map;
             m_ICPdocking_start_theta = g_robot_status_now.theta_map;
             m_ICPdocking_phase = 5;
+
+            pose_start.x_map = g_robot_status_now.x_map;
+            pose_start.y_map = g_robot_status_now.y_map;
+            pose_start.theta_map = g_robot_status_now.theta_map;
+            pose_end.x_map = m_ICPdocking_end_x;
+            pose_end.y_map = m_ICPdocking_end_y;
+            pose_end.theta_map = m_ICPdocking_end_theta;
         }
         if (_flag == -1)
         {
@@ -133,11 +151,13 @@ int _execute_ICP_move()
     }
     if (m_ICPdocking_phase == 5)
     {
-        _flag = m_ICPdocking_dp.dockingPlanning(able_forward, able_reverse, able_left_spin, able_right_spin,
-                                m_ICPdocking_start_x, m_ICPdocking_start_y, m_ICPdocking_start_theta, 
-                                m_ICPdocking_end_x, m_ICPdocking_end_y, m_ICPdocking_end_theta,
-                                g_robot_status_now.x_map, g_robot_status_now.y_map, g_robot_status_now.theta_map,
-                                _v, _omega, "end", true);
+        MapPoint pose_now;
+        pose_now.x_map = g_robot_status_now.x_map;
+        pose_now.y_map = g_robot_status_now.y_map;
+        pose_now.theta_map = g_robot_status_now.theta_map;
+       
+        _flag = g_lqr_planner.lqrPlanning("whole_path_line", pose_start, pose_end, pose_now,
+                                _v, _omega);
         if (_flag == 0)
         {
             m_ICPdocking_phase = 0;
@@ -197,8 +217,8 @@ int main(int argc, char** argv)
 #endif
 
 
-    int x_target = 1500;
-    int y_target = 3700;
+    int x_target = 1100;
+    int y_target = 1100;
     double theta_target = CV_PI/2;
 
 
@@ -227,7 +247,7 @@ int main(int argc, char** argv)
     
     int task_flag = 1;
     int task_phase = 0;
-    while (task_flag == 1)
+    while (task_flag != 0)
     {
 
         g_robotSimulator_current_pose = robotSimulator->getRobotPose();
@@ -250,14 +270,15 @@ int main(int argc, char** argv)
         
         if (task_phase == 1)
         {
-            if (!g_robot_controller_ready)
-            {
-                g_robot_go_params.go_distance = -100;
+            // if (!g_robot_controller_ready)
+            // {
+            //     g_robot_go_params.go_distance = -100;
 
-                g_robot_controller.setGoParams(g_robot_go_params);
-                g_robot_controller_ready = true;
-            }
-            task_flag = g_robot_controller.go(g_robot_status_now, g_command_v, g_command_omega);
+            //     g_robot_controller.setGoParams(g_robot_go_params);
+            //     g_robot_controller_ready = true;
+            // }
+            // task_flag = g_robot_controller.go(g_robot_status_now, g_command_v, g_command_omega);
+            task_flag = 0;
         }
 
         

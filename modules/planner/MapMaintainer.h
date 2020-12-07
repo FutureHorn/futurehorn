@@ -28,11 +28,11 @@ class MapMaintainer
         int setMap(std::string path);
         bool start();
         void run();
-        void clearCache();
 
-        void emptyMap();
+        void clearCache();
+        void clearTrajectory();
+
         void updateLocalMap();
-        void updateRobot();
 
     public:
         std::thread m_thread;
@@ -46,8 +46,14 @@ class MapMaintainer
 
         int m_wholeMap_size_col;
         int m_wholeMap_size_row;
+        double m_map_online_local_col_min;
+        double m_map_online_local_row_min;
 
         std::vector<cv::Point> m_robot_corners;
+        std::vector<cv::Point> m_robot_directArrows;
+
+        bool b_exist_trajectory;
+        std::vector<cv::Point2d> m_lqrPlan_trajectory_points;
 
 };
 

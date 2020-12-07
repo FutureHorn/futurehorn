@@ -21,10 +21,19 @@ class Drawer
 
     public:
         void draw();
-        void clear();
+        void clearCache();
+
+    public:
+        void drawRobot();
+        void drawTrajectory();
 
     public:
         std::thread m_thread;
+
+        cv::Mat m_show;
+
+        std::vector<cv::Point> m_robot_corners;
+       
 };
 
 #endif

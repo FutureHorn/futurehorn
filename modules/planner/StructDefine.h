@@ -63,6 +63,18 @@ struct RobotSimulatorPose
     }
 };
 
+struct MapPoint
+{
+    int x_map;
+    int y_map;
+    double theta_map;
+};
 
+struct SlamPoint
+{
+    double x;
+    double y;
+    double theta;
+};
 
 #endif
