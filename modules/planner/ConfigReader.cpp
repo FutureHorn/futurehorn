@@ -14,7 +14,7 @@ int ConfigReader::readMapInfo()
 {
     std::cerr << "Read map info" << std::endl;
 
-    FILE* fp = fopen(MAP_INFO_JSON_FILENAME.c_str(), "r"); 
+    FILE* fp = fopen((HOME_DIR+MAP_INFO_JSON_FILENAME).c_str(), "r"); 
     if (fp == NULL)
     {
         std::cerr << "File does not exists!" << std::endl;
@@ -31,11 +31,11 @@ int ConfigReader::readMapInfo()
 
     if(m_map_id == 0)
     {
-        m_task_map_path = HOME_DIR + "/CodeBase/futurehorn/config/planner/map.png";
+        m_task_map_path = HOME_DIR + "/Desktop/CodeBase/futurehorn/config/planner/map.png";
     }
     else
     {
-        m_task_map_path = HOME_DIR + "/CodeBase/futurehorn/config/planner/map.png";
+        m_task_map_path = HOME_DIR + "/Desktop/CodeBase/futurehorn/config/planner/map.png";
     }
 
     m_map_resolution = doc["map"]["resolution"].GetDouble();
@@ -45,7 +45,7 @@ int ConfigReader::readRobotInfo()
 {
     std::cerr << "Read robot info" << std::endl;
 
-    FILE* fp = fopen(ROBOT_INFO_JSON_FILENAME.c_str(), "r"); 
+    FILE* fp = fopen((HOME_DIR+ROBOT_INFO_JSON_FILENAME).c_str(), "r"); 
     if (fp == NULL)
     {
         std::cerr << "File does not exists!" << std::endl;
@@ -68,7 +68,7 @@ int ConfigReader::readTask_offline()
 {
     std::cerr << "Read offine task" << std::endl;
 
-    FILE* fp = fopen(TASK_OFFLINE_JSON_FILENAME.c_str(), "r"); 
+    FILE* fp = fopen((HOME_DIR+TASK_OFFLINE_JSON_FILENAME).c_str(), "r"); 
     if (fp == NULL)
     {
         std::cerr << "File does not exists!" << std::endl;

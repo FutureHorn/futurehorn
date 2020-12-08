@@ -13,9 +13,9 @@
 
 extern const std::string HOME_DIR;
 
-const std::string MAP_INFO_JSON_FILENAME(HOME_DIR + "/CodeBase/futurehorn/config/planner/map_info.json");
-const std::string ROBOT_INFO_JSON_FILENAME(HOME_DIR + "/CodeBase/futurehorn/config/planner/robot_info.json");
-const std::string TASK_OFFLINE_JSON_FILENAME(HOME_DIR + "/CodeBase/futurehorn/config/planner/task_offline.json");
+const std::string MAP_INFO_JSON_FILENAME(HOME_DIR + "/Desktop/CodeBase/futurehorn/config/planner/map_info.json");
+const std::string ROBOT_INFO_JSON_FILENAME(HOME_DIR + "/Desktop/CodeBase/futurehorn/config/planner/robot_info.json");
+const std::string TASK_OFFLINE_JSON_FILENAME(HOME_DIR + "/Desktop/CodeBase/futurehorn/config/planner/task_offline.json");
 
 class ConfigReader
 {
