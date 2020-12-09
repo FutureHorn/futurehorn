@@ -5,6 +5,7 @@
 #include "ConfigReader.h"
 #include "Drawer.h"
 #include "RobotController.h"
+#include "RobotBrain.h"
 
 
 #define __SIMULATION__
@@ -15,6 +16,7 @@ MapMaintainer g_mapMaintainer;
 TaskMaintainer_offline g_taskMaintainer_offline;
 Drawer g_drawer;
 ConfigReader g_configer;
+RobotBrain g_robotBrain;
 
 RobotController g_robot_controller;
 bool g_robot_controller_ready;
@@ -31,136 +33,21 @@ RobotStatus g_robot_status_now;
     #include "OdomSimulator.h"
     #include "LqrControl.h"
     #include "DockingPlan.h"
+    #include "LqrPlan.h"
 #endif
 
 #ifdef __SIMULATION__
     RobotSimulatorPose g_robotSimulator_current_pose;
+
+    LqrPlan g_lqr_planner;
 #endif
 
-double m_ICPdocking_start_x;
-double m_ICPdocking_start_y;
-double m_ICPdocking_start_theta;
-double m_ICPdocking_end_x;
-double m_ICPdocking_end_y;
-double m_ICPdocking_end_theta;
-DockingPlan m_ICPdocking_dp;
 
-int m_ICPdocking_phase;
 
 double g_command_v;
 double g_command_omega;
 
-
-int _execute_ICP_move()
-{
-    bool able_forward = true, able_reverse = true, able_left_spin = true, able_right_spin = true;
-  
-    double _v = 0.0, _omega = 0.0;
-   
-    int _flag;
-    if (m_ICPdocking_phase == 0)
-    {
-        double dist_before_end = 200;
-        double docking_x_end_before = m_ICPdocking_end_x + dist_before_end*cos(CV_PI+m_ICPdocking_end_theta);
-        double docking_y_end_before = m_ICPdocking_end_y + dist_before_end*sin(CV_PI+m_ICPdocking_end_theta);
-       
-        g_robot_rotate_params.theta_target = atan2(docking_y_end_before - m_ICPdocking_start_y, docking_x_end_before - m_ICPdocking_start_x);
-        NormalizeAngle(g_robot_rotate_params.theta_target);
-        g_robot_controller.setRotateParams(g_robot_rotate_params);
-
-        m_ICPdocking_phase = 1;
-    }
-    if (m_ICPdocking_phase == 1)
-    {
-        _flag = g_robot_controller.rotate(g_robot_status_now, _v, _omega);
-        if (_flag == 0)
-        {
-            m_ICPdocking_phase = 2;
-        }
-        if (_flag == -1)
-        {
-            std::cout<<"docking spin blocking!"<<std::endl;
-            _flag = 1;
-        }
-    }
-    if (m_ICPdocking_phase == 2)
-    {
-        _flag = m_ICPdocking_dp.dockingPlanning(able_forward, able_reverse, able_left_spin, able_right_spin,
-                                m_ICPdocking_start_x, m_ICPdocking_start_y, m_ICPdocking_start_theta, 
-                                m_ICPdocking_end_x, m_ICPdocking_end_y, m_ICPdocking_end_theta,
-                                g_robot_status_now.x_map, g_robot_status_now.y_map, g_robot_status_now.theta_map,
-                                _v, _omega, "line", true);
-        if (_flag == 0)
-        {
-            m_ICPdocking_phase = 3;
-        }
-        if (_flag == -1)
-        {
-            std::cout<<"docking spin blocking!"<<std::endl;
-            _flag = 1;
-        }
-        if (_flag == 2)
-        {
-            std::cout<<"docking plan failed!"<<std::endl;
-            m_ICPdocking_phase = 0;
-            _flag = 0;
-        }   
-    }
-    if (m_ICPdocking_phase == 3)
-    {
-        g_robot_rotate_params.theta_target = m_ICPdocking_end_theta;
-        NormalizeAngle(g_robot_rotate_params.theta_target);
-        g_robot_controller.setRotateParams(g_robot_rotate_params);
-
-        m_ICPdocking_phase = 4;
-        m_ICPdocking_dp.init();
-    }
-    if (m_ICPdocking_phase == 4)
-    {
-        _flag = g_robot_controller.rotate(g_robot_status_now, _v, _omega);
-        if (_flag == 0)
-        {
-            m_ICPdocking_start_x = g_robot_status_now.x_map;
-            m_ICPdocking_start_y = g_robot_status_now.y_map;
-            m_ICPdocking_start_theta = g_robot_status_now.theta_map;
-            m_ICPdocking_phase = 5;
-        }
-        if (_flag == -1)
-        {
-            std::cout<<"docking spin blocking!"<<std::endl;
-            _flag = 1;
-        }
-    }
-    if (m_ICPdocking_phase == 5)
-    {
-        _flag = m_ICPdocking_dp.dockingPlanning(able_forward, able_reverse, able_left_spin, able_right_spin,
-                                m_ICPdocking_start_x, m_ICPdocking_start_y, m_ICPdocking_start_theta, 
-                                m_ICPdocking_end_x, m_ICPdocking_end_y, m_ICPdocking_end_theta,
-                                g_robot_status_now.x_map, g_robot_status_now.y_map, g_robot_status_now.theta_map,
-                                _v, _omega, "end", true);
-        if (_flag == 0)
-        {
-            m_ICPdocking_phase = 0;
-        }
-        if (_flag == -1)
-        {
-            std::cout<<"docking spin blocking!"<<std::endl;
-            _flag = 1;
-        }
-        if (_flag == 2)
-        {
-            std::cout<<"docking plan failed!"<<std::endl;
-            m_ICPdocking_phase = 0;
-            _flag = 0;
-        }   
-    }
-
-    g_command_v = _v;
-    g_command_omega = _omega;
-    
-    return _flag;
-}
-
+MapPoint pose_start, pose_end;
 
 
 int main(int argc, char** argv)
@@ -173,16 +60,13 @@ int main(int argc, char** argv)
     {
         std::cout<<"map init ok"<<std::endl;
     }
-    if (g_configer.readTask_offline())
-    {
-        std::cout<<"task init ok"<<std::endl;
-    }
+  
 
 
     g_mapMaintainer.setMap(g_configer.m_task_map_path);
     g_mapMaintainer.start();
-    
-    g_taskMaintainer_offline.setTask(g_configer.m_task_type);
+   
+    g_taskMaintainer_offline.loadFile();
 
     g_robot_status_now.x_map = 700;
     g_robot_status_now.y_map = 800;
@@ -196,38 +80,12 @@ int main(int argc, char** argv)
     robotSimulator->start();
 #endif
 
-
-    int x_target = 1500;
-    int y_target = 3700;
-    double theta_target = CV_PI/2;
-
-
-    
-    bool forward = true;
-    m_ICPdocking_start_x = g_robot_status_now.x_map;
-    m_ICPdocking_start_y = g_robot_status_now.y_map;
-    if (forward)
-    {
-        m_ICPdocking_start_theta = g_robot_status_now.theta_map;
-    }
-    else
-    {
-        m_ICPdocking_start_theta = g_robot_status_now.theta_map - CV_PI;
-    }
-    m_ICPdocking_end_x = x_target; 
-    m_ICPdocking_end_y = y_target;
-    m_ICPdocking_end_theta = theta_target;
-    m_ICPdocking_dp.init();
-    m_ICPdocking_phase = 0;
-
-
     std::cout<<"planner init success!"<<std::endl;
-    
-    
+     
     
     int task_flag = 1;
     int task_phase = 0;
-    while (task_flag == 1)
+    while (task_flag != 0)
     {
 
         g_robotSimulator_current_pose = robotSimulator->getRobotPose();
@@ -235,30 +93,46 @@ int main(int argc, char** argv)
         g_robot_status_now.y_map = g_robotSimulator_current_pose.y;
         g_robot_status_now.theta_map = g_robotSimulator_current_pose.theta;
 
-        if (task_phase == 0)
-        {
-            // if (!g_robot_controller_ready)
-            // {
-            //     g_robot_rotate_params.theta_target = g_robot_status_now.theta_map - CV_PI/4;
-            //     NormalizeAngle(g_robot_rotate_params.theta_target);
-            //     g_robot_controller.setRotateParams(g_robot_rotate_params);
-            //     g_robot_controller_ready = true;
-            // }
-            // task_flag = g_robot_controller.rotate(g_robot_status_now, g_command_v, g_command_omega);
-            task_flag = _execute_ICP_move();
-        }
+        task_flag = g_robotBrain.run();
         
-        if (task_phase == 1)
-        {
-            if (!g_robot_controller_ready)
-            {
-                g_robot_go_params.go_distance = -100;
+        // if (task_phase == 0)
+        // {
+        //     // if (!g_robot_controller_ready)
+        //     // {
+        //     //     g_robot_rotate_params.theta_target = g_robot_status_now.theta_map - CV_PI/4;
+        //     //     NormalizeAngle(g_robot_rotate_params.theta_target);
+        //     //     g_robot_controller.setRotateParams(g_robot_rotate_params);
+        //     //     g_robot_controller_ready = true;
+        //     // }
+        //     // task_flag = g_robot_controller.rotate(g_robot_status_now, g_command_v, g_command_omega);
+        //     LqrParams lqr_params;
+        //     lqr_params.pathType = "whole_path_line";
+        //     lqr_params.dist_end = 200;
+        //     lqr_params.x_start = g_robot_status_now.x_map;
+        //     lqr_params.y_start = g_robot_status_now.y_map;
+        //     lqr_params.theta_start = g_robot_status_now.theta_map;
+        //     lqr_params.x_end = 1100;
+        //     lqr_params.y_end = 1100;
+        //     lqr_params.theta_end = CV_PI/3;
+        //     task_flag = g_lqr_planner.reset(lqr_params);
+        // }
+        // if (task_phase == 1)
+        // {
+        //     task_flag = g_lqr_planner.execute();
+        // }
+        
+        // if (task_phase == 2)
+        // {
+        //     // if (!g_robot_controller_ready)
+        //     // {
+        //     //     g_robot_go_params.go_distance = -100;
 
-                g_robot_controller.setGoParams(g_robot_go_params);
-                g_robot_controller_ready = true;
-            }
-            task_flag = g_robot_controller.go(g_robot_status_now, g_command_v, g_command_omega);
-        }
+        //     //     g_robot_controller.setGoParams(g_robot_go_params);
+        //     //     g_robot_controller_ready = true;
+        //     // }
+        //     // task_flag = g_robot_controller.go(g_robot_status_now, g_command_v, g_command_omega);
+        //     task_flag = 0;
+        // }
 
         
 

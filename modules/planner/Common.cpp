@@ -9,3 +9,9 @@ void NormalizeAngle(double &angle)
     }
     angle = a - CV_PI;
 }
+
+double String_to_Double(std::string s)
+{
+    double p = atof(s.c_str());
+    return p;
+} 

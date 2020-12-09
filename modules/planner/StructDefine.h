@@ -8,6 +8,16 @@ enum TASKTYPE
     TASK_CHARGE
 };
 
+struct Task
+{
+    TASKTYPE type;
+    double x_target;
+    double y_target;
+    double theta_target;
+
+
+};
+
 struct RobotStatus
 {
     double x = 0.0;
@@ -63,6 +73,18 @@ struct RobotSimulatorPose
     }
 };
 
+struct MapPoint
+{
+    int x_map;
+    int y_map;
+    double theta_map;
+};
 
+struct SlamPoint
+{
+    double x;
+    double y;
+    double theta;
+};
 
 #endif
