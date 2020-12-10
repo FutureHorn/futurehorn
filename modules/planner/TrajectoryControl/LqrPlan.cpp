@@ -223,7 +223,7 @@ int LqrPlan::lqrPlanning(std::string pathType, MapPoint pose_start, MapPoint pos
             tolerate_reach_range = 2;
         }
        
-        std::cout<<"!!!!!!!!!!!!!!!!!!!!! "<<std::abs(m_s_target - s_control)<<std::endl;
+        // std::cout<<"!!!!!!!!!!!!!!!!!!!!! "<<std::abs(m_s_target - s_control)<<std::endl;
         if (std::abs(m_s_target - s_control) < tolerate_reach_range)
         {
             if (m_pathType == "end")
@@ -249,6 +249,8 @@ int LqrPlan::lqrPlanning(std::string pathType, MapPoint pose_start, MapPoint pos
             return 1;
         }
     }
+
+    return 1;
 }
 
 int LqrPlan::initPath(MapPoint pose_start, MapPoint pose_end)
@@ -256,12 +258,11 @@ int LqrPlan::initPath(MapPoint pose_start, MapPoint pose_end)
     m_pose_start = pose_start;
     m_pose_end = pose_end;
 
-    std::cout<<m_pose_start.x_map<<std::endl;
-    std::cout<<m_pose_start.y_map<<std::endl;
-    std::cout<<pose_end.x_map<<std::endl;
-    std::cout<<pose_end.y_map<<std::endl;
+    // std::cout<<m_pose_start.x_map<<std::endl;
+    // std::cout<<m_pose_start.y_map<<std::endl;
+    // std::cout<<m_pose_end.x_map<<std::endl;
+    // std::cout<<m_pose_end.y_map<<std::endl;
 
- 
     m_lqrController.setConfig(g_mapMaintainer.m_map_resolution, 
         m_plan_v_max, m_plan_v_min, m_plan_omega_max, m_plan_omega_min);
 
@@ -286,9 +287,6 @@ int LqrPlan::initPath(MapPoint pose_start, MapPoint pose_end)
 std::vector<cv::Point2d> LqrPlan::generateWaypoint()
 {   
     std::vector<cv::Point2d> waypoints;
-
-    std::cout<<m_dist_start<<std::endl;
-    std::cout<<m_dist_end<<std::endl;
 
     if (m_pathType == "whole_path_curve")
     {

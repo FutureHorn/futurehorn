@@ -5,45 +5,45 @@
             "type":"MOVE",
             "target_pose":
             {
-                "x":500,
-                "y":700,
-                "theta":1.6
+                "x":565,
+                "y":2500,
+                "theta": -1.5
             }
         },
         {
             "type":"MOVE",
             "target_pose":
             {
-                "x":800,
-                "y":1000,
-                "theta":1.6
+                "x":725,
+                "y":625,
+                "theta":-1.5
             }
         },
         {
             "type":"MOVE",
             "target_pose":
             {
-                "x":1200,
-                "y":1300,
-                "theta":1.6
+                "x":1315,
+                "y":640,
+                "theta":0
             }
         },
         {
             "type":"MOVE",
             "target_pose":
             {
-                "x":500,
-                "y":1400,
-                "theta":1.6
+                "x":1130,
+                "y":2620,
+                "theta":1.7
             }
         },
         {
             "type":"MOVE",
             "target_pose":
             {
-                "x":400,
-                "y":1500,
-                "theta":1.6
+                "x":565,
+                "y":2500,
+                "theta": -1.5
             }
         }
     ]

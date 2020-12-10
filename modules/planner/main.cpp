@@ -68,9 +68,9 @@ int main(int argc, char** argv)
    
     g_taskMaintainer_offline.loadFile();
 
-    g_robot_status_now.x_map = 700;
-    g_robot_status_now.y_map = 800;
-    g_robot_status_now.theta_map = CV_PI/3;
+    g_robot_status_now.x_map = 475;
+    g_robot_status_now.y_map = 3000;
+    g_robot_status_now.theta_map = - CV_PI * 0.48;
 
 #ifdef __SIMULATION__
     RobotSimulatorPose g_robotSimulator_current_pose(g_robot_status_now.x_map, g_robot_status_now.y_map, g_robot_status_now.theta_map);
@@ -80,58 +80,43 @@ int main(int argc, char** argv)
     robotSimulator->start();
 #endif
 
+    g_robotBrain.reset();
     std::cout<<"planner init success!"<<std::endl;
      
-    
     int task_flag = 1;
     int task_phase = 0;
     while (task_flag != 0)
     {
-
         g_robotSimulator_current_pose = robotSimulator->getRobotPose();
         g_robot_status_now.x_map = g_robotSimulator_current_pose.x;
         g_robot_status_now.y_map = g_robotSimulator_current_pose.y;
         g_robot_status_now.theta_map = g_robotSimulator_current_pose.theta;
 
+        // std::cout<<g_robot_status_now.x_map<<" "<<g_robot_status_now.y_map
+            // <<" "<<g_robot_status_now.theta_map<<std::endl;
         task_flag = g_robotBrain.run();
         
         // if (task_phase == 0)
         // {
-        //     // if (!g_robot_controller_ready)
-        //     // {
-        //     //     g_robot_rotate_params.theta_target = g_robot_status_now.theta_map - CV_PI/4;
-        //     //     NormalizeAngle(g_robot_rotate_params.theta_target);
-        //     //     g_robot_controller.setRotateParams(g_robot_rotate_params);
-        //     //     g_robot_controller_ready = true;
-        //     // }
-        //     // task_flag = g_robot_controller.rotate(g_robot_status_now, g_command_v, g_command_omega);
-        //     LqrParams lqr_params;
-        //     lqr_params.pathType = "whole_path_line";
-        //     lqr_params.dist_end = 200;
-        //     lqr_params.x_start = g_robot_status_now.x_map;
-        //     lqr_params.y_start = g_robot_status_now.y_map;
-        //     lqr_params.theta_start = g_robot_status_now.theta_map;
-        //     lqr_params.x_end = 1100;
-        //     lqr_params.y_end = 1100;
-        //     lqr_params.theta_end = CV_PI/3;
-        //     task_flag = g_lqr_planner.reset(lqr_params);
-        // }
+        //     if (!g_robot_controller_ready)
+        //     {
+        //         g_robot_rotate_params.theta_target = g_robot_status_now.theta_map - CV_PI/4;
+        //         NormalizeAngle(g_robot_rotate_params.theta_target);
+        //         g_robot_controller.setRotateParams(g_robot_rotate_params);
+        //         g_robot_controller_ready = true;
+        //     }
+        //     task_flag = g_robot_controller.rotate(g_robot_status_now, g_command_v, g_command_omega);
+        // }    
         // if (task_phase == 1)
         // {
-        //     task_flag = g_lqr_planner.execute();
-        // }
-        
-        // if (task_phase == 2)
-        // {
-        //     // if (!g_robot_controller_ready)
-        //     // {
-        //     //     g_robot_go_params.go_distance = -100;
+        //     if (!g_robot_controller_ready)
+        //     {
+        //         g_robot_go_params.go_distance = -100;
 
-        //     //     g_robot_controller.setGoParams(g_robot_go_params);
-        //     //     g_robot_controller_ready = true;
-        //     // }
-        //     // task_flag = g_robot_controller.go(g_robot_status_now, g_command_v, g_command_omega);
-        //     task_flag = 0;
+        //         g_robot_controller.setGoParams(g_robot_go_params);
+        //         g_robot_controller_ready = true;
+        //     }
+        //     task_flag = g_robot_controller.go(g_robot_status_now, g_command_v, g_command_omega);
         // }
 
         

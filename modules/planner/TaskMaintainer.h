@@ -26,7 +26,8 @@ class TaskMaintainer_offline
     public:
         int loadFile();
         Task getNextTask();
-        std::string extract_value(std::string key, std::string buffer);
+        std::string extract_value_string(std::vector<std::string> key, std::string buffer);
+        double extract_value_double(std::vector<std::string> key, std::string buffer);
 
     public:
         std::vector<std::string> m_tasks_buffer;

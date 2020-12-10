@@ -41,8 +41,7 @@ int RobotController::go(RobotStatus robot_status_now, double &v, double &omega)
     double gap = sqrt(pow(m_go_params.x_target - robot_status_now.x_map, 2) + pow(m_go_params.y_target - robot_status_now.y_map, 2)) 
         * g_mapMaintainer.m_map_resolution;
 
-    std::cout<<sqrt(pow(m_go_params.x_target - robot_status_now.x_map, 2) + pow(m_go_params.y_target - robot_status_now.y_map, 2)) <<std::endl;
-    std::cout<<"dist error: "<<gap<<std::endl;
+    // std::cout<<"dist error: "<<gap<<std::endl;
 
     if ( fabs(gap) > fabs(m_go_params.v))
     {
@@ -78,7 +77,7 @@ int RobotController::rotate(RobotStatus robot_status_now, double &v, double &ome
     double gap = m_rotate_params.theta_target - robot_status_now.theta_map;
     NormalizeAngle(gap);
 
-    std::cout<<"theta error: "<<gap<<std::endl;
+    // std::cout<<"theta error: "<<gap<<std::endl;
 
     if ( fabs(gap) > fabs(m_rotate_params.omega))
     {
