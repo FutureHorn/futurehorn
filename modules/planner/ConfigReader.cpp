@@ -31,11 +31,11 @@ int ConfigReader::readMapInfo()
 
     if(m_map_id == 0)
     {
-        m_task_map_path = HOME_DIR + "/Desktop/CodeBase/futurehorn/config/planner/map.png";
+        m_task_map_path = HOME_DIR + "/CodeBase/futurehorn/config/planner/map.png";
     }
     else
     {
-        m_task_map_path = HOME_DIR + "/Desktop/CodeBase/futurehorn/config/planner/map.png";
+        m_task_map_path = HOME_DIR + "/CodeBase/futurehorn/config/planner/map.png";
     }
 
     m_map_resolution = doc["map"]["resolution"].GetDouble();

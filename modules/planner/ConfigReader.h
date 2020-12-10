@@ -17,8 +17,8 @@
 
 extern const std::string HOME_DIR;
 
-const std::string MAP_INFO_JSON_FILENAME(HOME_DIR + "/Desktop/CodeBase/futurehorn/config/planner/map_info.json");
-const std::string ROBOT_INFO_JSON_FILENAME(HOME_DIR + "/Desktop/CodeBase/futurehorn/config/planner/robot_info.json");
+const std::string MAP_INFO_JSON_FILENAME("/CodeBase/futurehorn/config/planner/map_info.json");
+const std::string ROBOT_INFO_JSON_FILENAME("/CodeBase/futurehorn/config/planner/robot_info.json");
 
 class ConfigReader
 {

@@ -8,7 +8,7 @@
 #include "ConfigReader.h"
 
 extern const std::string HOME_DIR;
-const std::string TASK_OFFLINE_JSON_FILENAME(HOME_DIR + "/Desktop/CodeBase/futurehorn/config/planner/task_offline.json");
+const std::string TASK_OFFLINE_JSON_FILENAME("/CodeBase/futurehorn/config/planner/task_offline.json");
 
 class TaskMaintainer
 {
